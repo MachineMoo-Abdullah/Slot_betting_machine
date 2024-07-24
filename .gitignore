@@ -155,8 +155,128 @@ dmypy.json
 cython_debug/
 
 # PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
+import random
+MAX_LINES = 3
+MIN_BET = 1
+MAX_BET = 100
+ROWS = 3
+COLS = 3
+symbol_count = {
+    "A":2,
+    "B":4,
+    "C":6,
+    "D":8
+}
+symbol_value ={
+    "A":5,
+    "B":4,
+    "C":3,
+    "D":2
+}
+def check_winnings(columns,lines, bet, values):
+    winnings = 0
+    winning_lines = []
+    for line in range(lines):
+        symbol = columns[0][line]
+        for column in columns:
+            symbol_to_check = column[line]
+            if symbol != symbol_to_check:
+                break
+        else:
+            winnings += values[symbol] * bet
+            winning_lines.append(line + 1)
+    return winnings,winning_lines
+
+def get_slot_machine_spin(rows,cols,symbols):
+    all_symbols = []
+    for symbol,symbol_count in symbols.items():
+        for _ in range(symbol_count):
+            all_symbols.append(symbol)
+    columns = []
+    for col in range(cols):
+        column = []
+        current_symbols = all_symbols[:]  # for copy
+        for _ in range(rows):
+            value = random.choice(current_symbols)
+            current_symbols.remove(value)
+            column.append(value)
+        columns.append(column)
+    return columns
+
+def print_slot_machine(columns):
+    for row in range(len(columns[0])):
+        for i,column in enumerate(columns):
+            if i != len(columns)-1:
+                print(column[row],end=" | ")
+            else:
+                print(column[row])
+
+def deposit():
+    while True:
+        dep =input("Enter amount of money to deposit : $")
+        if dep.isdigit():
+            dep = int(dep)
+            if dep > 0:
+                break
+            else:
+                print("Amount must be greater than zero!")
+        else:
+            print("Amount must be a digit!")
+    return dep
+
+def lines():
+    while True:
+        line = input(f"Enter number of lines to bet on between (1 - {MAX_LINES}) : ")
+        if line.isdigit():
+            line = int(line)
+            if 1 <= line <= MAX_LINES:
+                break
+            else:
+                print(f"Lines must be between (1 - {MAX_LINES})!")
+        else:
+            print("Number of lines must be a digit!")
+    return line
+
+def get_bet():
+    while True:
+        bet_money =input(f"Enter amount of money for bet (${MIN_BET} - ${MAX_BET}) : ")
+        if bet_money.isdigit():
+            bet_money = int(bet_money)
+            if MIN_BET <= bet_money <= MAX_BET:
+                break
+            else:
+                print("Amount must be between (${MIN_BET} - ${MAX_BET})!")
+        else:
+            print("Amount must be a digit!")
+    return bet_money
+def game(balance):
+    line_num = lines()
+    while True:
+        amount_bet = get_bet()
+        total_bet = amount_bet * line_num
+        if total_bet > balance:
+            print(f"You don't have enough balance to bet. Your current Balance is : ${balance}")
+        else:
+            break
+    print(f"You are betting ${amount_bet} on {line_num} lines. Total bet is equal to: ${total_bet}")
+    slots = get_slot_machine_spin(ROWS, COLS, symbol_count)
+    print_slot_machine(slots)
+    winnings, winning_lines = check_winnings(slots, line_num, amount_bet, symbol_value)
+    print(f"You won ${winnings}.")
+    print(f"You won on lines : ", *winning_lines)
+    return winnings - total_bet
+
+def main():
+    balance = deposit()
+    while True:
+        print(f"Current Balance is : ${balance}")
+        spin= input("Press Enter to spin (Press q to quit) : ")
+        if spin == "q":
+            break
+        balance += game(balance)
+        if balance <= 0:
+            break
+    print(f"You left with : ${balance}")
+
+main()
 #.idea/
